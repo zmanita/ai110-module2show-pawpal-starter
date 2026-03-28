@@ -10,12 +10,21 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+classes: Task, Pet & Scheduler
+responsibilities:
+1) Task: Store tasks for each pet (task name, frequency, due date, description), complete tasks as marked.
+2) Pet: store list of pets (pet name, species, age, associated task).
+3) Scheduler: add/remove pets, view all tasks for each pet, see upcoming and completed tasks, check conficts, generate recurring tasks.
+
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
----
+I made several changes based on AI feedback on missing relationships or potential logic bottlenecks. For example:
+    1.	Added remove_pet & remove_task method on Task & Scheduler. Even though my initial design had these, the AI generated skeleton missed on including the methods. 
+    2.	Added pet param to check_conflict to relate which pet the task belongs to.
+
 
 ## 2. Scheduling Logic and Tradeoffs
 
