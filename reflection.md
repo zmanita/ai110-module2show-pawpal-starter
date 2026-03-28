@@ -1,6 +1,9 @@
 # PawPal+ Project Reflection
 
 ## 1. System Design
+- add/remove a pet
+- add/remove daily & weekly tasks
+- check tasks as completed
 
 **a. Initial design**
 
