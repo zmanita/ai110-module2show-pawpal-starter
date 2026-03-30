@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
 from pawpal_system import Owner, Pet, Task, Scheduler, Frequency
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
@@ -91,10 +91,44 @@ st.divider()
 # ── Generate Schedule ────────────────────────────────────────────────────────
 st.subheader("Today's Schedule")
 
+# Filter controls
+col_filter1, col_filter2 = st.columns(2)
+with col_filter1:
+    all_pet_names = [p.name for p in st.session_state.owner.pets]
+    filter_pet = st.selectbox(
+        "Filter by pet", ["All pets"] + all_pet_names, key="filter_pet"
+    )
+with col_filter2:
+    filter_status = st.selectbox(
+        "Filter by status", ["All", "Pending", "Completed"], key="filter_status"
+    )
+
 if st.button("Generate schedule"):
-    upcoming = st.session_state.scheduler.get_upcoming_tasks()
-    if not upcoming:
-        st.info("No upcoming tasks. Add some tasks above.")
+    scheduler = st.session_state.scheduler
+
+    # Use sort_by_time() as the base sorted list
+    sorted_tasks = scheduler.sort_by_time()
+
+    # Apply pet filter via filter_by_pet()
+    if filter_pet != "All pets":
+        sorted_tasks = [
+            (name, task) for name, task in sorted_tasks if name == filter_pet
+        ]
+
+    # Apply completion filter via filter_by_completion()
+    if filter_status == "Pending":
+        completed_set = {
+            id(task) for _, task in scheduler.filter_by_completion(False)
+        }
+        sorted_tasks = [(n, t) for n, t in sorted_tasks if id(t) in completed_set]
+    elif filter_status == "Completed":
+        completed_set = {
+            id(task) for _, task in scheduler.filter_by_completion(True)
+        }
+        sorted_tasks = [(n, t) for n, t in sorted_tasks if id(t) in completed_set]
+
+    if not sorted_tasks:
+        st.info("No tasks match the selected filters.")
     else:
         rows = [
             {
@@ -103,8 +137,29 @@ if st.button("Generate schedule"):
                 "Task": task.description,
                 "Duration (min)": task.duration_mins,
                 "Frequency": task.frequency.value,
-                "Done": "Yes" if task.is_completed else "No",
+                "Status": "✅ Done" if task.is_completed else "⏳ Pending",
             }
-            for pet_name, task in upcoming
+            for pet_name, task in sorted_tasks
         ]
+        st.success(f"Showing {len(rows)} task(s) sorted by time.")
         st.table(rows)
+
+    # ── Conflict Warnings ─────────────────────────────────────────────────────
+    conflicts = scheduler.get_all_conflicts()
+    if conflicts:
+        st.markdown(
+            "<p style='color:red; font-weight:bold;'>⚠️ Schedule Conflicts Detected:</p>",
+            unsafe_allow_html=True,
+        )
+        for (name_a, task_a), (name_b, task_b) in conflicts:
+            end_a = (task_a.due_time + timedelta(minutes=task_a.duration_mins)).strftime("%I:%M %p")
+            end_b = (task_b.due_time + timedelta(minutes=task_b.duration_mins)).strftime("%I:%M %p")
+            msg = (
+                f"**'{task_a.description}'** ({name_a}, "
+                f"{task_a.due_time.strftime('%I:%M %p')}–{end_a}) "
+                f"overlaps with **'{task_b.description}'** ({name_b}, "
+                f"{task_b.due_time.strftime('%I:%M %p')}–{end_b})"
+            )
+            st.markdown(
+                f"<p style='color:red;'>• {msg}</p>", unsafe_allow_html=True
+            )
