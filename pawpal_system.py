@@ -13,6 +13,7 @@ class Frequency(Enum):
 
 @dataclass
 class Task:
+    
     # Represents a single activity (description, time, frequency, completion status)
     id: int
     description: str
@@ -23,7 +24,6 @@ class Task:
 
     def mark_complete(self) -> None:
         self.is_completed = True
-
 
 @dataclass
 class Pet:
@@ -128,7 +128,68 @@ class Scheduler:
                 pet.remove_task(task_id)
 
     def complete_task(self, task_id: int) -> None:
-        for _, task in self.get_all_tasks():
-            if task.id == task_id:
-                task.mark_complete()
-                return
+        for owner in self.owners:
+            for pet in owner.pets:
+                for task in pet.tasks:
+                    if task.id != task_id:
+                        continue
+                    task.mark_complete()
+                    if task.frequency == Frequency.DAILY:
+                        interval = timedelta(days=1)
+                    elif task.frequency == Frequency.WEEKLY:
+                        interval = timedelta(weeks=1)
+                    else:
+                        return
+                    next_id = max(t.id for _, t in self.get_all_tasks()) + 1
+                    pet.add_task(Task(
+                        id=next_id,
+                        description=task.description,
+                        due_time=task.due_time + interval,
+                        duration_mins=task.duration_mins,
+                        frequency=task.frequency,
+                    ))
+                    return
+    
+    def schedule_task(self, pet: Pet, task: Task) -> str:
+        # Adds the task and returns a warning string for every overlap found.
+        # Never raises — the task is always scheduled regardless of conflicts.
+        warnings = []
+        new_end = task.due_time + timedelta(minutes=task.duration_mins)
+        for name, existing in self.get_all_tasks():
+            if existing.is_completed:
+                continue
+            existing_end = existing.due_time + timedelta(minutes=existing.duration_mins)
+            if task.due_time < existing_end and existing.due_time < new_end:
+                warnings.append(
+                    f"WARNING: '{task.description}' ({pet.name}, "
+                    f"{task.due_time.strftime('%I:%M %p')}-{new_end.strftime('%I:%M %p')}) "
+                    f"overlaps with '{existing.description}' ({name}, "
+                    f"{existing.due_time.strftime('%I:%M %p')}-{existing_end.strftime('%I:%M %p')})"
+                )
+        pet.add_task(task)
+        return "\n".join(warnings)
+
+    def get_all_conflicts(self) -> List[tuple[tuple[str, Task], tuple[str, Task]]]:
+        # Returns every pair of incomplete tasks whose time windows overlap,
+        # including tasks belonging to different pets.
+        all_tasks = [(name, task) for name, task in self.get_all_tasks()
+                     if not task.is_completed]
+        conflicts = []
+        for i in range(len(all_tasks)):
+            for j in range(i + 1, len(all_tasks)):
+                _, task_a = all_tasks[i]
+                _, task_b = all_tasks[j]
+                end_a = task_a.due_time + timedelta(minutes=task_a.duration_mins)
+                end_b = task_b.due_time + timedelta(minutes=task_b.duration_mins)
+                if task_a.due_time < end_b and task_b.due_time < end_a:
+                    conflicts.append((all_tasks[i], all_tasks[j]))
+        return conflicts
+
+    def sort_by_time(self) -> List[tuple[str, Task]]:
+        return sorted(self.get_all_tasks(), key=lambda pair: pair[1].due_time)
+    
+    def filter_by_pet(self, pet_name: str) -> List[tuple[str, Task]]:
+        return [(name, task) for name, task in self.get_all_tasks() if name == pet_name]
+    
+    def filter_by_completion(self, completed: bool) -> List[tuple[str, Task]]:
+        return [(name, task) for name, task in self.get_all_tasks() if task.is_completed == completed]
