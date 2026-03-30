@@ -45,5 +45,6 @@ The tests cover:
 5. The system identifies conflicting tasks based on due times. Task1 ending at 9:30 and task2 ending at 9:30 produces a conflict.
 6. The system identifies non-conflicting tasks based on due times. Task1 ending at 9:29 and task2 starting at 9:30 do not produce a conflict.
 
- ##📸 Demo
- <a href="/course_images/ai110/Screenshot 2026-03-29 at 10.47.17 PM" target="_blank"><img src='/Users/zarinmusarratmanita/Desktop/Spring26/AI110/ai110-module2show-pawpal-starter/Screenshot 2026-03-29 at 10.47.17 PM.png>
+## 📸 Demo
+
+![App screenshot](Screenshot%202026-03-29%20at%2010.47.17%E2%80%AFPM.png)
