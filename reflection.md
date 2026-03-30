@@ -49,12 +49,15 @@ The tradeoff is simplicity — modeling location and travel time would require s
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
+I used AI tools for esign brainstorming, debugging, refactoring.
+Prompts with very specific instructions were most helpful. 
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
-
+I did not accept an AI suggestion when I asked for imporoved ability in my code.
+The AI output was more pythonic than what is human-friendly.
 ---
 
 ## 4. Testing and Verification
@@ -62,13 +65,16 @@ The tradeoff is simplicity — modeling location and travel time would require s
 **a. What you tested**
 
 - What behaviors did you test?
+I tested scheduling, conflict detection, sorting tasks etc.
 - Why were these tests important?
+These are core logic of the system.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+10/10
 - What edge cases would you test next if you had more time?
-
+A task that is already completed — should it still generate the next occurrence?
 ---
 
 ## 5. Reflection
@@ -76,11 +82,14 @@ The tradeoff is simplicity — modeling location and travel time would require s
 **a. What went well**
 
 - What part of this project are you most satisfied with?
+The conflict detection tests.
 
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
+More engaging and colorful AI.
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+AI does not always have a good understanding of what is easy to humans.
