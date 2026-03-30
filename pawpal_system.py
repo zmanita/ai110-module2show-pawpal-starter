@@ -77,6 +77,7 @@ class Scheduler:
         return sorted(incomplete, key=lambda pair: pair[1].due_time)
 
     def check_conflicts(self, pet: Pet, new_task: Task) -> bool:
+        # Returns True if new_task overlaps with any existing incomplete task for the pet.
         new_end = new_task.due_time + timedelta(minutes=new_task.duration_mins)
         for task in pet.tasks:
             if task.is_completed:
@@ -88,6 +89,8 @@ class Scheduler:
         return False
 
     def generate_recurring_tasks(self, last_run: datetime) -> None:
+        # For each recurring task, if its next occurrence falls between last_run and now,
+        # create a new Task instance for that occurrence and add it to the pet's tasks.
         now = datetime.now()
         new_tasks: List[tuple[Pet, Task]] = []
         next_id = max((t.id for _, t in self.get_all_tasks()), default=0) + 1
@@ -118,6 +121,7 @@ class Scheduler:
             pet.add_task(task)
 
     def remove_completed_tasks(self) -> None:
+        # Deletes all tasks marked as completed across all pets.
         for owner in self.owners:
             for pet in owner.pets:
                 pet.tasks = [t for t in pet.tasks if not t.is_completed]
@@ -128,6 +132,7 @@ class Scheduler:
                 pet.remove_task(task_id)
 
     def complete_task(self, task_id: int) -> None:
+        # Marks the task with the given ID as completed. If it's a recurring task, also schedules the next occurrence.
         for owner in self.owners:
             for pet in owner.pets:
                 for task in pet.tasks:
@@ -186,10 +191,13 @@ class Scheduler:
         return conflicts
 
     def sort_by_time(self) -> List[tuple[str, Task]]:
+        # Returns all tasks sorted by their due_time, regardless of pet or completion status.
         return sorted(self.get_all_tasks(), key=lambda pair: pair[1].due_time)
     
     def filter_by_pet(self, pet_name: str) -> List[tuple[str, Task]]:
+        # Returns all tasks belonging to the pet with the given name, regardless of completion status.
         return [(name, task) for name, task in self.get_all_tasks() if name == pet_name]
     
     def filter_by_completion(self, completed: bool) -> List[tuple[str, Task]]:
+        # Returns all tasks filtered by their completion status.
         return [(name, task) for name, task in self.get_all_tasks() if task.is_completed == completed]

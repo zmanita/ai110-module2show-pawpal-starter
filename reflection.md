@@ -38,6 +38,9 @@ I made several changes based on AI feedback on missing relationships or potentia
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+The scheduler checks for time window overlap, i.e., if task 1 ends at 9:00 AM and task 2 starts at 9:01 AM, there is no conflict. This can often produce unrealistic schdules to maintain.
+The tradeoff is simplicity — modeling location and travel time would require significantly more data per task and a more complex conflict check.
+
 ---
 
 ## 3. AI Collaboration
