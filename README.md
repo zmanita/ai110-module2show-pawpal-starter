@@ -41,3 +41,13 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+## Testing PawPal+
+Use this command to run tests: python -m pytest
+The tests cover:
+1. Any task's is_completed status is changed from False to True once user marks it done.
+2. Adding a task to a pet increases the pet's task count.
+3. Sorting tasks by due time orders them correctly in pawpal_system. 
+4. Marking a daily task complete creates a new task for the following day.
+5. The system identifies conflicting tasks based on due times. Task1 ending at 9:30 and task2 ending at 9:30 produces a conflict.
+6. The system identifies non-conflicting tasks based on due times. Task1 ending at 9:29 and task2 starting at 9:30 do not produce a conflict.

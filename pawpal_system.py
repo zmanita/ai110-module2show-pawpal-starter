@@ -39,6 +39,19 @@ class Pet:
 
     def remove_task(self, task_id: int) -> None:
         self.tasks = [t for t in self.tasks if t.id != task_id]
+    
+    def get_tasks_sorted_by_due_time(self) -> List[Task]:
+        return sorted(self.tasks, key=lambda t: t.due_time)
+
+    def has_conflicting_tasks(self) -> bool:
+        for i in range(len(self.tasks)):
+            for j in range(i + 1, len(self.tasks)):
+                a, b = self.tasks[i], self.tasks[j]
+                end_a = a.due_time + timedelta(minutes=a.duration_mins)
+                end_b = b.due_time + timedelta(minutes=b.duration_mins)
+                if a.due_time < end_b and b.due_time < end_a:
+                    return True
+        return False
 
 
 @dataclass
